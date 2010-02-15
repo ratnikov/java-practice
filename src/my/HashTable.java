@@ -1,12 +1,38 @@
 package my;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.*;
 
 public class HashTable<K, V> {
   private static final int INIT_BUCKET_SIZE = 128;
+
+  public static class Entry<K, V> implements Map.Entry<K, V> {
+    K key;
+    V value;
+
+    public Entry(K key, V value) {
+      this.key = key;
+      this.value = value;
+    }
+
+    public boolean equals(Entry other) {
+      return (this.getKey() == other.getKey()) && (this.getValue() == other.getValue());
+    }
+
+    public K getKey() {
+      return this.key;
+    }
+
+    public V getValue() {
+      return this.value;
+    }
+
+    public V setValue(V value) {
+      V oldValue = this.value;
+      this.value = value;
+
+      return oldValue;
+    }
+  }
 
   class Bucket {
     List<Node> nodes = new ArrayList<Node>();
@@ -63,6 +89,16 @@ public class HashTable<K, V> {
       } else {
 	return null;
       }
+    }
+
+    Set<K> keySet() {
+      Set<K> keys = new TreeSet<K>();
+
+      for (Node node : this.nodes) {
+	keys.add(node.key);
+      }
+
+      return keys;
     }
 
     Collection<V> values() {
@@ -138,12 +174,38 @@ public class HashTable<K, V> {
     return removed;
   }
 
+  public void putAll(HashTable<K, V> values) {
+    for (K key : values.keySet()) {
+      this.put(key, values.get(key));
+    }
+  }
+
   public int size() {
     return this.elementCount;
   }
 
   public boolean isEmpty() {
     return this.size() == 0;
+  }
+
+  public Set<K> keySet() {
+    Set<K> keys = new TreeSet<K>();
+
+    for (Bucket bucket : this.buckets) {
+      keys.addAll(bucket.keySet());
+    }
+
+    return keys;
+  }
+
+  public Set<Map.Entry<K, V>> entrySet() {
+    Set<Map.Entry<K, V>> entries = new HashSet<Map.Entry<K, V>>();
+    
+    for (K key : this.keySet()) {
+      entries.add(new Entry<K, V>(key, get(key)));
+    }
+
+    return entries;
   }
 
   public Collection<V> values() {

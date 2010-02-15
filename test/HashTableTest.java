@@ -5,8 +5,7 @@ import org.junit.*;
 import static org.junit.Assert.*;
 import static org.junit.matchers.JUnitMatchers.*;
 
-import java.util.Map;
-import java.util.Collection;
+import java.util.*;
 
 public class HashTableTest {
   class CustomKey {
@@ -23,6 +22,17 @@ public class HashTableTest {
     }
 
     public String toString() { return this.name; }
+  }
+
+  HashTable<String, Object> emptyMap = new HashTable<String, Object>();
+  HashTable<String, Object> filledMap = new HashTable<String, Object>();
+
+  Object foo = new Object();
+  Object bar = new Object();
+
+  @Before public void setUp() {
+    filledMap.put("foo", foo);
+    filledMap.put("bar", bar);
   }
 
   @Test public void testTruth() {
@@ -73,6 +83,13 @@ public class HashTableTest {
     assertEquals("Should lookup the added element", foo, map.get("foo"));
 
     assertEquals("Should lookup bar as well", bar, map.get("bar"));
+  }
+
+  @Test public void addMultipleElements() {
+    emptyMap.putAll(filledMap);
+
+    assertEquals(2, emptyMap.size());
+    assertEquals(filledMap.keySet(), emptyMap.keySet());
   }
 
   @Test public void containElements() {
@@ -159,5 +176,23 @@ public class HashTableTest {
     assertEquals(foo, map.get(foo_key));
     assertEquals(bar, map.get(bar_key));
     assertEquals(baz, map.get(baz_key));
+  }
+
+  @Test public void returnsKeySet() {
+    assertThat(filledMap.keySet(), hasItems("foo", "bar"));
+  }
+
+  @Test public void returnEntrySet() {
+    HashTable<String, Object> map = new HashTable<String, Object>();
+
+    Object foo = new Object();
+    Object bar = new Object();
+
+    map.put("foo", foo);
+    map.put("bar", bar);
+
+    Set<Map.Entry<String, Object>> keySet = filledMap.entrySet();
+
+    assertEquals(2, keySet.size());
   }
 }
