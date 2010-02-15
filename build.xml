@@ -4,20 +4,39 @@
   </description>
   <!-- set global properties for this build -->
   <property name="src" location="src"/>
+  <property name="src.tests" location="test" />
+
   <property name="build" location="build"/>
+  <property name="build.src" location="${build}/src" />
+  <property name="build.tests" location="${build}/test" />
   <property name="dist"  location="dist"/>
+  <property name="lib" location="lib" />
+
+  <property name="junit" location="${lib}/junit-4.8.1.jar" />
 
   <target name="init">
     <!-- Create the time stamp -->
     <tstamp/>
     <!-- Create the build directory structure used by compile -->
     <mkdir dir="${build}"/>
+
+    <mkdir dir="${build.src}" />
+    <mkdir dir="${build.tests}" />
   </target>
 
   <target name="compile" depends="init"
     description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src}" destdir="${build}"/>
+    <javac srcdir="${src}" destdir="${build}/code"/>
+  </target>
+
+  <target name="compile-test" depends="compile"
+    description="compile the test files" >
+    <javac srcdir="${src.tests}" destdir="${build.tests}">
+      <classpath>
+	<pathelement path="${junit}" />
+      </classpath>
+    </javac>
   </target>
 
   <target name="dist" depends="compile"
@@ -26,7 +45,28 @@
     <mkdir dir="${dist}/lib"/>
 
     <!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
-    <jar jarfile="${dist}/lib/google-practice-${DSTAMP}.jar" basedir="${build}"/>
+    <jar jarfile="${dist}/lib/google-practice-${DSTAMP}.jar" basedir="${build}/code"/>
+  </target>
+
+  <target name="test" depends="compile-test"
+    description="Runs the tests" >
+    <junit printsummary="yes" haltonfailure="yes">
+      <classpath>
+	<pathelement location="${build.tests}"/>
+	<pathelement path="${java.class.path}"/>
+	<pathelement path="${lib}/junit-4.8.1.jar" />
+      </classpath>
+
+      <formatter type="plain"/>
+
+      <batchtest fork="yes">
+	<formatter type="plain" usefile="false"/>
+	<fileset dir="${src.tests}">
+	  <include name="**/*Test*.java"/>
+	  <exclude name="**/AllTests.java"/>
+	</fileset>
+      </batchtest>
+    </junit>
   </target>
 
   <target name="clean"
