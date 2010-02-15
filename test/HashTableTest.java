@@ -1,9 +1,12 @@
 import my.HashTable;
 
 import org.junit.*;
+
 import static org.junit.Assert.*;
+import static org.junit.matchers.JUnitMatchers.*;
 
 import java.util.Map;
+import java.util.Collection;
 
 public class HashTableTest {
   class CustomKey {
@@ -24,6 +27,18 @@ public class HashTableTest {
 
   @Test public void testTruth() {
     assertTrue("Should be true", true);
+  }
+
+  @Test public void testSize() {
+    HashTable<String, Object> map = new HashTable<String, Object>();
+
+    assertTrue(map.isEmpty());
+    assertEquals(0, map.size());
+
+    map.put("foo", new Object());
+
+    assertFalse(map.isEmpty());
+    assertEquals(1, map.size());
   }
 
   @Test public void clearingHash() {
@@ -58,6 +73,53 @@ public class HashTableTest {
     assertEquals("Should lookup the added element", foo, map.get("foo"));
 
     assertEquals("Should lookup bar as well", bar, map.get("bar"));
+  }
+
+  @Test public void containElements() {
+    HashTable<String, Object> map = new HashTable<String, Object>();
+
+    Object foo = new Object();
+
+    map.put("foo", foo);
+
+    assertTrue("Should contain added element key", map.containsKey("foo"));
+    assertTrue("Should contain added element value", map.containsValue(foo));
+
+    assertFalse("Should not contain un-added key", map.containsKey("bar"));
+    assertFalse("Should not contain un-added value", map.containsValue(new Object()));
+  }
+  
+  @Test public void removeElements() {
+    HashTable<String, Object> map = new HashTable<String, Object>();
+
+    Object foo = new Object();
+
+    map.put("foo", foo);
+
+    assertEquals(foo, map.get("foo"));
+
+    assertEquals("Should return null if removing a non-existing item", null, map.remove("bar"));
+    assertEquals("Should not change size", 1, map.size());
+
+    assertEquals("Should return the removed item", foo, map.remove("foo"));
+
+    assertFalse("Should not contain the key anymore", map.containsKey("foo"));
+    assertEquals("Should decrement the size", 0, map.size());
+  }
+
+  @Test public void returnsValues() {
+    HashTable<String, Object> map = new HashTable<String, Object>();
+
+    Object foo = new Object();
+    Object bar = new Object();
+
+    map.put("foo", foo);
+    map.put("bar", bar);
+
+    Collection<Object> values = map.values();
+
+    assertThat(values, hasItem(foo));
+    assertThat(values, hasItem(bar));
   }
 
   @Test public void replacingElement() { 

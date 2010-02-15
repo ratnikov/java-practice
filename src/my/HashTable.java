@@ -1,5 +1,6 @@
 package my;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
@@ -51,7 +52,30 @@ public class HashTable<K, V> {
       }
     }
 
-    private Node findNode(K key) {
+    V remove(K key) {
+      Node node = findNode(key);
+
+      if (node != null) {
+	// remove the node from the known nodes and return the value
+	this.nodes.remove(node);
+
+	return node.value;
+      } else {
+	return null;
+      }
+    }
+
+    Collection<V> values() {
+      List<V> values = new ArrayList<V>(this.nodes.size());
+
+      for (Node node : this.nodes) {
+	values.add(node.value);
+      }
+
+      return values;
+    }
+
+    Node findNode(K key) {
       for (Node node : this.nodes) {
 	if (node.key == key) {
 	  return node;
@@ -80,6 +104,14 @@ public class HashTable<K, V> {
     }
   }
 
+  public boolean containsKey(K key) {
+    return get(key) != null;
+  }
+
+  public boolean containsValue(V value) {
+    return values().contains(value);
+  }
+
   public V get(K key) {
     return getBucket(key).get(key);
   }
@@ -95,8 +127,33 @@ public class HashTable<K, V> {
     return replacedValue;
   }
 
+  public V remove(K key) {
+    V removed = getBucket(key).remove(key);
+
+    // need to keep track of the element count if it was removed
+    if (removed != null) {
+      this.elementCount--;
+    }
+
+    return removed;
+  }
+
   public int size() {
     return this.elementCount;
+  }
+
+  public boolean isEmpty() {
+    return this.size() == 0;
+  }
+
+  public Collection<V> values() {
+    List<V> values = new ArrayList<V>(this.size());
+
+    for (Bucket bucket : this.buckets) {
+      values.addAll(bucket.values());
+    }
+
+    return values;
   }
 
   /**
