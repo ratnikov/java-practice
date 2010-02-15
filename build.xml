@@ -27,15 +27,21 @@
   <target name="compile" depends="init"
     description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src}" destdir="${build}/code"/>
+    <javac srcdir="${src}" destdir="${build.src}" debug="on">
+      <compilerarg value="-Xlint"/>
+    </javac>
   </target>
 
   <target name="compile-test" depends="compile"
     description="compile the test files" >
-    <javac srcdir="${src.tests}" destdir="${build.tests}">
+    <javac srcdir="${src.tests}" destdir="${build.tests}" debug="on">
       <classpath>
+	<pathelement location="${build.src}" />
+	<pathelement location="${build.tests}" />
 	<pathelement path="${junit}" />
       </classpath>
+
+      <compilerarg value="-Xlint"/>
     </javac>
   </target>
 
@@ -52,6 +58,7 @@
     description="Runs the tests" >
     <junit printsummary="yes" haltonfailure="yes">
       <classpath>
+	<pathelement location="${build.src}" />
 	<pathelement location="${build.tests}"/>
 	<pathelement path="${java.class.path}"/>
 	<pathelement path="${lib}/junit-4.8.1.jar" />
