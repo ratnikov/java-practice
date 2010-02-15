@@ -6,11 +6,20 @@ import static org.junit.Assert.*;
 import java.util.Map;
 
 public class HashTableTest {
-  // change to Mao once full Map interface is supported
-  HashTable<String, Object> map;
+  class CustomKey {
+    int hashCode;
+    String name;
 
-  @Before public void setUp() {
-    map = new HashTable<String, Object>();
+    CustomKey(String name, int hashCode) {
+      this.name = name;
+      this.hashCode = hashCode;
+    }
+
+    public int hashCode() { 
+      return this.hashCode;
+    }
+
+    public String toString() { return this.name; }
   }
 
   @Test public void testTruth() {
@@ -18,6 +27,8 @@ public class HashTableTest {
   }
 
   @Test public void clearingHash() {
+    HashTable<String, Object> map = new HashTable<String, Object>();
+
     Object foo = new Object();
 
     map.put("foo", foo);
@@ -31,18 +42,27 @@ public class HashTableTest {
     assertEquals("Should not locate the added elements", null, map.get("foo"));
   }
 
-  @Test public void addElement() {
+  @Test public void addElements() {
+    HashTable<String, Object> map = new HashTable<String, Object>();
+
     Object foo = new Object();
+    Object bar = new Object();
 
     map.clear();
 
-    map.put("foo", foo);
+    assertEquals(null, map.put("foo", foo));
+    assertEquals(null, map.put("bar", bar));
 
-    assertEquals("Should bump size by one", 1, map.size());
+    assertEquals("Should bump size again", 2, map.size());
+
     assertEquals("Should lookup the added element", foo, map.get("foo"));
+
+    assertEquals("Should lookup bar as well", bar, map.get("bar"));
   }
 
   @Test public void replacingElement() { 
+    HashTable<String, Object> map = new HashTable<String, Object>();
+
     Object foo = new Object();
     Object bar = new Object();
 
@@ -55,5 +75,27 @@ public class HashTableTest {
     assertEquals("Should replace foo with bar", bar, map.get("foo"));
 
     assertEquals("Should not bump size", 1, map.size());
+  }
+
+  @Test public void addElementsSharingHashCode() {
+    HashTable<CustomKey, Object> map = new HashTable<CustomKey, Object>();
+
+    Object foo = new Object();
+    Object bar = new Object();
+    Object baz = new Object();
+
+    CustomKey foo_key = new CustomKey("foo", 1024);
+    CustomKey bar_key = new CustomKey("bar", 1025);
+    CustomKey baz_key = new CustomKey("baz", 1025);
+
+    map.put(foo_key, foo);
+    map.put(bar_key, bar);
+    map.put(baz_key, baz);
+
+    assertEquals(3, map.size());
+
+    assertEquals(foo, map.get(foo_key));
+    assertEquals(bar, map.get(bar_key));
+    assertEquals(baz, map.get(baz_key));
   }
 }
